@@ -35,8 +35,8 @@ child(X, Y) :- father(Y, X).
 child(X, Y) :- mother(Y, X).
 child(X, Y) :- daughter(X, Y).
 child(X, Y) :- son(X, Y).
-son(X, Y) :- male(X), child(X, Y).
-daughter(X, Y) :- female(X), child(X, Y).
+son(X, Y) :- male(X), parent(Y, X).
+daughter(X, Y) :- female(X), parent(Y, X).
 
 % Sibling relationships
 % Siblings Rule
