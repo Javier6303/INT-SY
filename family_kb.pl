@@ -21,7 +21,7 @@
 :- dynamic grandchild/2.
 :- dynamic relative/2.
 :- dynamic genderless/1.
-
+:- dynamic safe_add_parent/2.
 
 % Rules for family relationships
 
@@ -106,6 +106,18 @@ relative(X, Y) :-
 % Logical Constraints
 contradiction :- male(X), female(X). % A person cannot be both male and female.
 contradiction :- parent(X, X). % A person cannot be their own parent.
+
+% Cycle Detection
+has_cycle(X, Y) :-
+    parent(Y, X). % Direct cycle: Y is already a parent of X
+has_cycle(X, Y) :-
+    parent(Z, X),
+    has_cycle(Z, Y). % Indirect cycle: Transitive parent relationship
+
+% Add a parent-child relationship only if it does not create a cycle
+safe_add_parent(X, Y) :-
+    \+ has_cycle(X, Y), % Ensure no cycle exists
+    assertz(parent(X, Y)).
 
 % Helpers to dynamically add facts
 learn_fact(Fact) :-

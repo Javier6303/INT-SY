@@ -2,7 +2,7 @@ import re
 from pyswip import Prolog
 
 prolog = Prolog()
-prolog.consult("relationship.pl")
+prolog.consult("family_kb.pl")
 
 RELATIONSHIPS = {
     "siblings": {},
