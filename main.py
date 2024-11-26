@@ -147,12 +147,19 @@ def process_assertion(sentence):
             name1, name2 = match.groups()
             assert_relationship("father", name1, name2, "male")
             return True
-
-        # Pattern: "<Name1> is a grandparent of <Name2>."
-        match = re.match(r"([A-Z][a-z]*) is a grandparent of ([A-Z][a-z]*)\.", sentence)
+        
+        # Pattern: "<Name1> is a grandmother of <Name2>."
+        match = re.match(r"([A-Z][a-z]*) is a grandmother of ([A-Z][a-z]*)\.", sentence)
         if match:
             name1, name2 = match.groups()
-            assert_relationship("grandparent", name1, name2)
+            assert_relationship("grandmother", name1, name2)
+            return True
+        
+        # Pattern: "<Name1> is a grandmother of <Name2>."
+        match = re.match(r"([A-Z][a-z]*) is a grandfather of ([A-Z][a-z]*)\.", sentence)
+        if match:
+            name1, name2 = match.groups()
+            assert_relationship("grandfather", name1, name2)
             return True
 
         # Pattern: "<Name1> is a grandchild of <Name2>."
@@ -347,6 +354,14 @@ def process_query(sentence):
         print("Yes!" if exists else "No!")
         return True
 
+    # Pattern: "Is <Name1> a grandmother of <Name2>?"
+    match = re.match(r"Is ([A-Z][a-z]*) a grandmother of ([A-Z][a-z]*)\?", sentence)
+    if match:
+        name1, name2 = match.groups()
+        exists = is_existing_relation("grandmother", name1, name2)
+        print("Yes!" if exists else "No!")
+        return True
+    
     # If no pattern matched
     return False
 
