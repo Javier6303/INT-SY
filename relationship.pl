@@ -3,7 +3,7 @@
 :- dynamic male/1.
 :- dynamic female/1.
 :- dynamic person/1.
-:- dynamic sibling/2.
+:- dynamic siblings/2.
 :- dynamic brother/2.
 :- dynamic sister/2.
 :- dynamic father/2.
@@ -22,6 +22,8 @@
 :- dynamic relative/2.
 :- dynamic genderless/1.
 :- dynamic safe_add_parent/2.
+:- dynamic siblings_direct/2.
+
 
 % Rules for family relationships
 
@@ -34,19 +36,41 @@ child(X, Y) :- parent(Y, X).
 son(X, Y) :- male(X), parent(Y, X).
 daughter(X, Y) :- female(X), parent(Y, X).
 
-% Sibling relationships
-siblings(X, Y) :- parent(Z, X), parent(Z, Y), X \= Y.
-brother(X, Y) :- male(X), siblings(X, Y).
-sister(X, Y) :- female(X), siblings(X, Y).
+% Base sibling facts (direct relationships)
+siblings(X, Y) :- siblings_direct(X, Y).
+siblings(X, Y) :- siblings_direct(Y, X).
+siblings(X, Y) :- siblings_direct(X, Z), siblings(Z, Y), X \= Y, \+ siblings_direct(X, Y).
+
+% Adding gendered sibling relationships
+brother(X, Y) :-
+    male(X),
+    siblings(X, Y).
+
+sister(X, Y) :-
+    female(X),
+    siblings(X, Y).
 
 % Grandparent relationships
-grandparent(X, Y) :- parent(X, Z), parent(Z, Y).
+grandparent(X, Y) :-
+    parent(X, Z),
+    parent(Z, Y).
+
 grandfather(X, Y) :- male(X), grandparent(X, Y).
 grandmother(X, Y) :- female(X), grandparent(X, Y).
 
+% Grandchild relationships
+grandchild(X, Y) :- child(X, Z), grandparent(Y, Z).
+
 % Uncle and Aunt relationships
-uncle(X, Y) :- male(X), siblings(X, Z), parent(Z, Y).
-aunt(X, Y) :- female(X), siblings(X, Z), parent(Z, Y).
+uncle(X, Y) :-
+    male(X),
+    siblings(X, Z),
+    parent(Z, Y).
+
+aunt(X, Y) :-
+    female(X),
+    siblings(X, Z),
+    parent(Z, Y).
 
 % Combined Aunt or Uncle
 aunt_or_uncle(X, Y) :- siblings(X, Z), parent(Z, Y).
@@ -78,7 +102,7 @@ relative(X, Y) :-
 
 % Logical Constraints
 contradiction :- male(X), female(X). % A person cannot be both male and female.
-contradiction :- parent(X, X). % A person cannot be their own parent.
+contradiction :- parent(X, X).       % A person cannot be their own parent.
 
 % Cycle Detection
 has_cycle(X, Y) :-

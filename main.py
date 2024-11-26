@@ -2,22 +2,22 @@ import re
 from pyswip import Prolog
 
 prolog = Prolog()
-prolog.consult("family_kb.pl")
+prolog.consult("relationship.pl")
 
 RELATIONSHIPS = {
     "siblings": {},
-    "sister": {},
-    "brother": {},
-    "mother": {},
-    "father": {},
+    "sister": {"gender": "female"},
+    "brother": {"gender": "male"},
+    "mother": {"gender": "female"},
+    "father": {"gender": "male"},
     "parent": {},
     "child": {},
-    "daughter": {},
-    "son": {},
-    "grandmother": {},
-    "grandfather": {},
-    "aunt": {},
-    "uncle": {},
+    "daughter": {"gender": "female"},
+    "son": {"gender": "male"},
+    "grandmother": {"gender": "female"},
+    "grandfather": {"gender": "male"},
+    "aunt": {"gender": "female"},
+    "uncle": {"gender": "male"},
     "cousin": {},
     "grandchild": {},
     "relative": {}
@@ -33,11 +33,10 @@ def execute_query(query):
 
 def is_existing_relation(relation, name1, name2=None):
     """Check if a specific relationship exists."""
-    if name2:
-        query = f"{relation}({name1.lower()}, {name2.lower()})"
-    else:
-        query = f"{relation}({name1.lower()})"
+    name1, name2 = name1.lower(), (name2.lower() if name2 else None)
+    query = f"{relation}({name1}, {name2})" if name2 else f"{relation}({name1})"
     return bool(execute_query(query))
+
 
 def get_all_parents(child):
     """Retrieve all parents of a given child."""
@@ -81,37 +80,55 @@ def check_gender(name, gender):
 
 def assert_relationship(relation, name1, name2, gender=None):
     """Assert a specific relationship."""
-    if name1.lower() == name2.lower():
-        raise ValueError("That's impossible!")
-    if relation in ["father", "mother", "parent"]:
-        if bool(execute_query(f"has_cycle({name1.lower()}, {name2.lower()})")):
-            raise ValueError("That's impossible!")
+    name1, name2 = name1.lower(), name2.lower()
 
+    if name1 == name2:
+        raise ValueError(f"That's impossible! A person cannot be their own {relation}.")
+
+    # Check for circular relationships (e.g., in parent-child cases)
+    if relation in ["father", "mother", "parent"]:
+        if detect_cycle(name1, name2):
+            raise ValueError(f"That's impossible! Adding {relation} between {name1} and {name2} would create a circular ancestry.")
+
+    # Check if the relationship already exists
     if is_existing_relation(relation, name1, name2):
-        raise ValueError(f"{name1} is already the {relation} of {name2}.")
+        raise ValueError(f"{name1.capitalize()} is already the {relation} of {name2.capitalize()}.")
 
+    # Check gender consistency
     if gender:
-        current_gender = get_gender(name1)
-        if current_gender and current_gender != gender:
-            raise ValueError(
-                "That's impossible!"
-            )
+        if not check_gender(name1, gender):
+            raise ValueError(f"That's impossible! {name1.capitalize()} is not {gender}.")
 
+    # Add the relationship
     if relation in ["father", "mother", "parent"]:
-        result = execute_query(f"safe_add_parent({name1.lower()}, {name2.lower()})")
+        result = execute_query(f"safe_add_parent({name1}, {name2})")
         if not result:
-            raise ValueError("That's impossible!")
+            raise ValueError(f"That's impossible! Adding {relation} between {name1} and {name2} would create a cycle.")
+    elif relation in ["siblings", "sister", "brother"]:
+        # Use siblings_direct to prevent recursion issues
+        prolog.assertz(f"siblings_direct({name1.lower()}, {name2.lower()})")
     else:
-        prolog.assertz(f"{relation}({name1.lower()}, {name2.lower()})")
+        prolog.assertz(f"{relation}({name1}, {name2})")
 
+    # Add gender if applicable
     if gender:
-        prolog.assertz(f"{gender}({name1.lower()})")
+        prolog.assertz(f"{gender}({name1})")
 
     print("OK! I learned something.")
+
+def reload_prolog():
+    """Reload the Prolog knowledge base."""
+    try:
+        prolog.consult("relationship.pl")
+        print("Prolog knowledge base reloaded.")
+    except Exception as e:
+        print(f"Failed to reload Prolog file: {e}")
+
 
 def process_assertion(sentence):
     """Process assertion sentences dynamically."""
     try:
+        
         # Pattern: "<Name1> and <Name2> are siblings."
         match = re.match(r"([A-Z][a-z]*) and ([A-Z][a-z]*) are siblings\.", sentence)
         if match:
@@ -160,6 +177,13 @@ def process_assertion(sentence):
         if match:
             name1, name2 = match.groups()
             assert_relationship("grandfather", name1, name2)
+            return True
+        
+        # Pattern: "<Name1> is a child of <Name2>."
+        match = re.match(r"([A-Z][a-z]*) is a child of ([A-Z][a-z]*)\.", sentence)
+        if match:
+            name1, name2 = match.groups()
+            assert_relationship("child", name1, name2)
             return True
 
         # Pattern: "<Name1> is a daughter of <Name2>."
@@ -346,6 +370,7 @@ def process_query(sentence):
     # If no pattern matched
     return False
 
+
 def process_sentence(sentence):
     """Process both assertions and queries."""
     if process_assertion(sentence):
@@ -355,7 +380,9 @@ def process_sentence(sentence):
     return False
 
 if __name__ == "__main__":
+    reload_prolog()
     print("Enter a prompt below.")
     while (sentence := input("\n> ").strip()) != "quit":
         if not process_sentence(sentence):
             print("Invalid input given.")
+
