@@ -272,14 +272,6 @@ def process_query(sentence):
         print("Yes!" if exists1 and exists2 else "No!")
         return True
 
-    # Pattern: "Is <Name1> a grandparent of <Name2>?"
-    match = re.match(r"Is ([A-Z][a-z]*) a grandparent of ([A-Z][a-z]*)\?", sentence)
-    if match:
-        name1, name2 = match.groups()
-        exists = is_existing_relation("grandparent", name1, name2)
-        print("Yes!" if exists else "No!")
-        return True
-
     # Pattern: "Is <Name1> a grandchild of <Name2>?"
     match = re.match(r"Is ([A-Z][a-z]*) a grandchild of ([A-Z][a-z]*)\?", sentence)
     if match:
@@ -364,7 +356,6 @@ def process_query(sentence):
     
     # If no pattern matched
     return False
-
 
 def process_sentence(sentence):
     """Process both assertions and queries."""
