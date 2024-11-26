@@ -6,18 +6,18 @@ prolog.consult("family_kb.pl")
 
 RELATIONSHIPS = {
     "siblings": {},
-    "sister": {"gender": "female"},
-    "brother": {"gender": "male"},
-    "mother": {"gender": "female"},
-    "father": {"gender": "male"},
+    "sister": {},
+    "brother": {},
+    "mother": {},
+    "father": {},
     "parent": {},
     "child": {},
-    "daughter": {"gender": "female"},
-    "son": {"gender": "male"},
-    "grandmother": {"gender": "female"},
-    "grandfather": {"gender": "male"},
-    "aunt": {"gender": "female"},
-    "uncle": {"gender": "male"},
+    "daughter": {},
+    "son": {},
+    "grandmother": {},
+    "grandfather": {},
+    "aunt": {},
+    "uncle": {},
     "cousin": {},
     "grandchild": {},
     "relative": {}
@@ -155,18 +155,11 @@ def process_assertion(sentence):
             assert_relationship("grandmother", name1, name2)
             return True
         
-        # Pattern: "<Name1> is a grandmother of <Name2>."
+        # Pattern: "<Name1> is a grandfather of <Name2>."
         match = re.match(r"([A-Z][a-z]*) is a grandfather of ([A-Z][a-z]*)\.", sentence)
         if match:
             name1, name2 = match.groups()
             assert_relationship("grandfather", name1, name2)
-            return True
-
-        # Pattern: "<Name1> is a grandchild of <Name2>."
-        match = re.match(r"([A-Z][a-z]*) is a grandchild of ([A-Z][a-z]*)\.", sentence)
-        if match:
-            name1, name2 = match.groups()
-            assert_relationship("grandchild", name1, name2)
             return True
 
         # Pattern: "<Name1> is a daughter of <Name2>."
@@ -198,7 +191,7 @@ def process_assertion(sentence):
             return True
 
         # Pattern: "<Name1> and <Name2> are the parents of <Name3>."
-        match = re.match(r"([A-Z][a-z]*) and ([A-Z][a-z]*) are the parents of ([A-Z][a-z]*)\.", sentence)
+        match = re.match(r"Are ([A-Z][a-z]*) and ([A-Z][a-z]*) the parents of ([A-Z][a-z]*)\.", sentence)
         if match:
             name1, name2, child = match.groups()
             assert_relationship("parent", name1, child)
@@ -206,7 +199,7 @@ def process_assertion(sentence):
             return True
 
         # Pattern: "<Name1>, <Name2>, and <Name3> are children of <Name4>."
-        match = re.match(r"([A-Z][a-z]*), ([A-Z][a-z]*), and ([A-Z][a-z]*) are children of ([A-Z][a-z]*)\.", sentence)
+        match = re.match(r"Are ([A-Z][a-z]*), ([A-Z][a-z]*), and ([A-Z][a-z]*) are children of ([A-Z][a-z]*)\.", sentence)
         if match:
             child1, child2, child3, parent = match.groups()
             assert_relationship("parent", parent, child1)
@@ -271,12 +264,12 @@ def process_query(sentence):
         exists2 = is_existing_relation("parent", parent2, child)
         print("Yes!" if exists1 and exists2 else "No!")
         return True
-
-    # Pattern: "Is <Name1> a grandchild of <Name2>?"
-    match = re.match(r"Is ([A-Z][a-z]*) a grandchild of ([A-Z][a-z]*)\?", sentence)
+    
+    # Pattern: "Is <Name1> a grandmother of <Name2>?"
+    match = re.match(r"Is ([A-Z][a-z]*) a grandmother of ([A-Z][a-z]*)\?", sentence)
     if match:
         name1, name2 = match.groups()
-        exists = is_existing_relation("grandchild", name1, name2)
+        exists = is_existing_relation("grandmother", name1, name2)
         print("Yes!" if exists else "No!")
         return True
 
@@ -321,6 +314,18 @@ def process_query(sentence):
         exists = is_existing_relation("uncle", name1, name2)
         print("Yes!" if exists else "No!")
         return True
+    
+    #whowhowhowho
+
+    # Pattern: "Is <Name1> a grandfather of <Name2>?"
+    match = re.match(r"Is ([A-Z][a-z]*) a grandfather of ([A-Z][a-z]*)\?", sentence)
+    if match:
+        name1, name2 = match.groups()
+        exists = is_existing_relation("grandfather", name1, name2)
+        print("Yes!" if exists else "No!")
+        return True
+    
+    #whowhowho
 
     # Pattern: "Is <Name1> an aunt of <Name2>?"
     match = re.match(r"Is ([A-Z][a-z]*) an aunt of ([A-Z][a-z]*)\?", sentence)
@@ -335,22 +340,6 @@ def process_query(sentence):
     if match:
         name1, name2 = match.groups()
         exists = is_existing_relation("relative", name1, name2)
-        print("Yes!" if exists else "No!")
-        return True
-    
-    # Pattern: "Is <Name1> a grandfather of <Name2>?"
-    match = re.match(r"Is ([A-Z][a-z]*) a grandfather of ([A-Z][a-z]*)\?", sentence)
-    if match:
-        name1, name2 = match.groups()
-        exists = is_existing_relation("grandfather", name1, name2)
-        print("Yes!" if exists else "No!")
-        return True
-
-    # Pattern: "Is <Name1> a grandmother of <Name2>?"
-    match = re.match(r"Is ([A-Z][a-z]*) a grandmother of ([A-Z][a-z]*)\?", sentence)
-    if match:
-        name1, name2 = match.groups()
-        exists = is_existing_relation("grandmother", name1, name2)
         print("Yes!" if exists else "No!")
         return True
     
