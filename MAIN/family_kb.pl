@@ -42,9 +42,6 @@ daughter(X, Y) :- female(X), parent(Y, X).
 
 siblings(X, Y) :- (sister(X, Y); brother(X, Y); sister(Y, X); brother(Y, X)), X \= Y.
 siblings(X, Y) :- (parent(Z, X); father(Z, X); mother(Z, X); brother(Z,X), sister(Z,X)), (parent(Z, Y); father(Z, Y); mother(Z, Y); brother(Z,Y); sister(Z,Y)), X \= Y.
-siblings(X, Y) :- siblings_direct(X, Y).
-siblings(X, Y) :- siblings_direct(Y, X).
-siblings(X, Y) :- siblings_direct(X, Z), siblings(Z, Y), X \= Y, \+ siblings_direct(X, Y).
 
 brother(X, Y) :-
     male(X),
