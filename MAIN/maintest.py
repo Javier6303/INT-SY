@@ -688,7 +688,7 @@ def are_related(excluded, inverse_excluded, name1, name2):
         is_existing_relation(rel, name2, name1) for rel in relations_inverse
     )
 
-# function to check if a given name has a specified gender and relationship
+
 def is_valid_gender(name, gender):
     try:
         return bool(list(prolog.query(f"{gender.lower()}({name.lower()})")))
@@ -696,7 +696,7 @@ def is_valid_gender(name, gender):
         print(f"Error: {e}")
         return False
     
-# function to checking
+
 def person_exists(name, rs):
     try:
         return bool(list(prolog.query(f"{rs.lower()}({name.lower()})")))

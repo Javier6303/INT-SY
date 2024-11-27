@@ -24,6 +24,7 @@
 
 % Rules for family relationships
 
+
 % Father/mother depend only on explicit facts
 father(X, Y) :- male(X), parent(X, Y).
 mother(X, Y) :- female(X), parent(X, Y).
@@ -85,22 +86,23 @@ cousin(X, Y) :-
     X \= Y.
 
 % Relatives
-relative(X, Y) :-
-    parent(X, Y);
-    child(X, Y);
-    sibling(X, Y);
-    grandparent(X, Y);
-    grandchild(X, Y);
-    uncle(X, Y);
-    aunt(X, Y);
-    cousin(X, Y);
-    aunt_or_uncle(X, Y);
-    father(X, Y);
-    mother(X, Y);
-    brother(X, Y);
-    sister(X, Y);
-    son(X, Y);
-    daughter(X, Y).
+relatives(X, Y) :- parent(X, Y).
+relatives(X, Y) :- child(X, Y).
+relatives(X, Y) :- siblings(X, Y).
+relatives(X, Y) :- grandparent(X, Y).
+relatives(X, Y) :- grandchild(X, Y).
+relatives(X, Y) :- uncle(X, Y).
+relatives(X, Y) :- aunt(X, Y).
+relatives(X, Y) :- cousin(X, Y).
+relatives(X, Y) :- aunt_or_uncle(X, Y).
+relatives(X, Y) :- father(X, Y).
+relatives(X, Y) :- mother(X, Y).
+relatives(X, Y) :- brother(X, Y).
+relatives(X, Y) :- sister(X, Y).
+relatives(X, Y) :- son(X, Y).
+relatives(X, Y) :- daughter(X, Y).
+
+
 
 % Logical Constraints
 contradiction :- male(X), female(X). % A person cannot be both male and female.
